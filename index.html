@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Новости — renderxxx</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#0f1720;color:#e6eef6;margin:0;padding:20px}
+    .container{max-width:900px;margin:0 auto}
+    .release{background:#11161a;border-radius:6px;padding:16px;margin:16px 0}
+    .release h2{margin:0 0 8px;font-size:20px}
+    .release .date{color:#8fa3b3;font-size:13px;margin-bottom:8px}
+    .release .body{color:#d8e6ef}
+    .empty{color:#93a6b6}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Новости — renderxxx</h1>
+    <div id="releases">Загрузка...</div>
+  </div>
+  <script>
+    (function(){
+      var repoAtom = 'https://github.com/renderxxx-0/csgo_news/releases.atom';
+      function render(entries){
+        var out = '';
+        if(entries.length===0){ out = '<div class="empty">Пока нет релизов.</div>'; }
+        entries.forEach(function(it){
+          out += '<div class="release">';
+          out += '<h2>' + (it.title||'Без названия') + '</h2>';
+          out += '<div class="date">' + (it.date? new Date(it.date).toLocaleString() : '') + '</div>';
+          out += '<div class="body">' + (it.description||'') + '</div>';
+          out += '</div>';
+        });
+        document.getElementById('releases').innerHTML = out;
+      }
+
+      fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(repoAtom)).then(function(r){ return r.text(); }).then(function(xmlText){
+        try{
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(xmlText,'text/xml');
+          var entries = doc.getElementsByTagName('entry');
+          var items = [];
+          for(var i=0;i<entries.length;i++){
+            var e = entries[i];
+            var title = (e.getElementsByTagName('title')[0]||{}).textContent || '';
+            var published = (e.getElementsByTagName('published')[0]||{}).textContent || '';
+            var content = (e.getElementsByTagName('content')[0]||{}).textContent || (e.getElementsByTagName('summary')[0]||{}).textContent || '';
+            items.push({title:title,date:published,description:content});
+          }
+          render(items);
+        }catch(e){ document.getElementById('releases').innerText = 'Ошибка парсинга фида.' }
+      }).catch(function(){ document.getElementById('releases').innerText = 'Не удалось загрузить фид. Возможно, нужно включить GitHub Pages или проверить репозиторий.' });
+    })();
+  </script>
+</body>
+</html>
