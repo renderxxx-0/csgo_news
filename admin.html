@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>News Panel</h2>
+
+<input id="title" placeholder="Title"><br>
+<input id="desc" placeholder="Description"><br>
+<input id="img" placeholder="Image URL"><br>
+
+<button onclick="postNews()">Post</button>
+
+<hr>
+<div id="list"></div>
+
+<script>
+
+const API = "https://your-render-url.onrender.com";
+
+async function load()
+{
+    const res = await fetch(API + "/rss.json");
+    const data = await res.json();
+
+    document.getElementById("list").innerHTML =
+        data.items.map(n =>
+            `<p>
+                <b>${n.title}</b>
+                <button onclick="del(${n.id})">X</button>
+            </p>`
+        ).join("");
+}
+
+async function postNews()
+{
+    await fetch(API + "/news", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            title: title.value,
+            description: desc.value,
+            imageUrl: img.value
+        })
+    });
+
+    load();
+}
+
+async function del(id)
+{
+    await fetch(API + "/news/" + id, {
+        method: "DELETE"
+    });
+
+    load();
+}
+
+load();
+
+</script>
+
+</body>
+</html>
