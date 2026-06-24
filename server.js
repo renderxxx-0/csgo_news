@@ -3,10 +3,10 @@ import fs from "fs";
 import cors from "cors";
 import path from "path";
 
-app.use(express.static("public"));
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 const DB_FILE = "./news.json";
 
