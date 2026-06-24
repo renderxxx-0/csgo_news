@@ -1,70 +1,58 @@
 import express from "express";
 import fs from "fs";
+import cors from "cors";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const DB_FILE = "./news.json";
 
-// загрузка
-function loadNews()
+function load()
 {
-    if (!fs.existsSync(DB_FILE))
-        return [];
-
+    if (!fs.existsSync(DB_FILE)) return [];
     return JSON.parse(fs.readFileSync(DB_FILE));
 }
 
-// сохранение
-function saveNews(data)
+function save(data)
 {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// 📌 получить RSS (JSON)
 app.get("/rss.json", (req, res) =>
 {
-    const news = loadNews();
-
-    res.json({
-        items: news
-    });
+    res.json({ items: load() });
 });
 
-// 📌 добавить новость
 app.post("/news", (req, res) =>
 {
-    const news = loadNews();
+    let data = load();
 
     const item = {
         id: Date.now(),
-        title: req.body.title,
+        title: req.body.title || "No title",
         description: req.body.description || "",
         imageUrl: req.body.imageUrl || "",
-        date: new Date().toISOString(),
-        link: req.body.link || ""
+        link: req.body.link || "",
+        date: new Date().toISOString()
     };
 
-    news.unshift(item);
-
-    saveNews(news);
+    data.unshift(item);
+    save(data);
 
     res.json({ ok: true, item });
 });
 
-// 📌 удалить новость
 app.delete("/news/:id", (req, res) =>
 {
-    let news = loadNews();
-
-    news = news.filter(n => n.id != req.params.id);
-
-    saveNews(news);
+    let data = load();
+    data = data.filter(n => n.id != req.params.id);
+    save(data);
 
     res.json({ ok: true });
 });
 
 app.listen(3000, () =>
 {
-    console.log("RSS server running");
+    console.log("RSS API running");
 });
