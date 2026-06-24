@@ -2,36 +2,35 @@
 <html>
 <body>
 
-<h2>News Panel</h2>
+<h2>News Admin</h2>
 
-<input id="title" placeholder="Title"><br>
-<input id="desc" placeholder="Description"><br>
-<input id="img" placeholder="Image URL"><br>
+<input id="title" placeholder="title"><br>
+<input id="desc" placeholder="desc"><br>
+<input id="img" placeholder="image url"><br>
 
-<button onclick="postNews()">Post</button>
+<button onclick="post()">POST</button>
 
 <hr>
 <div id="list"></div>
 
 <script>
 
-const API = "https://your-render-url.onrender.com";
+const API = "https://YOUR-RENDER.onrender.com";
 
 async function load()
 {
-    const res = await fetch(API + "/rss.json");
-    const data = await res.json();
+    const r = await fetch(API + "/rss.json");
+    const d = await r.json();
 
-    document.getElementById("list").innerHTML =
-        data.items.map(n =>
-            `<p>
-                <b>${n.title}</b>
-                <button onclick="del(${n.id})">X</button>
-            </p>`
-        ).join("");
+    list.innerHTML = d.items.map(n =>
+        `<div>
+            <b>${n.title}</b>
+            <button onclick="del(${n.id})">X</button>
+        </div>`
+    ).join("");
 }
 
-async function postNews()
+async function post()
 {
     await fetch(API + "/news", {
         method: "POST",
@@ -48,10 +47,7 @@ async function postNews()
 
 async function del(id)
 {
-    await fetch(API + "/news/" + id, {
-        method: "DELETE"
-    });
-
+    await fetch(API + "/news/" + id, { method: "DELETE" });
     load();
 }
 
