@@ -1,7 +1,9 @@
 import express from "express";
 import fs from "fs";
 import cors from "cors";
+import path from "path";
 
+app.use(express.static("public"));
 const app = express();
 app.use(cors());
 app.use(express.json());
